@@ -9,29 +9,50 @@ from docx import Document
 # 分享連結: https://drive.google.com/drive/folders/XXXXXX?usp=sharing
 FOLDER_ID = "https://drive.google.com/drive/folders/1ikACGNurRLwmpAiKOvep9MdTHF01pXKE?usp=sharing"
 
-# === 第一步：下載整個資料夾 ===
-# gdown 會把所有檔案下載到 "downloaded_docs" 資料夾
-os.makedirs("downloaded_docs", exist_ok=True)
-gdown.download_folder(id=FOLDER_ID, output="downloaded_docs", quiet=False, use_cookies=False)
+DOWNLOAD_DIR = "downloaded_docs"
 
-# === 第二步：抓取下載到的 DOCX 檔案 ===
-docx_files = [f for f in os.listdir("downloaded_docs") if f.endswith(".docx")]
+def download_folder(folder_id: str, output_dir: str):
+    os.makedirs(output_dir, exist_ok=True)
+    gdown.download_folder(id=folder_id, output=output_dir, quiet=False, use_cookies=False)
 
-if not docx_files:
-    print("⚠️ 沒有找到任何 .docx 文件")
-    exit()
+def list_docx_files(dirpath: str):
+    return [f for f in os.listdir(dirpath) if f.lower().endswith(".docx")]
 
-print("找到以下 DOCX 文件：")
-for i, f in enumerate(docx_files, 1):
-    print(f"{i}. {f}")
+def read_docx_file(filepath: str):
+    document = Document(filepath)
+    for para in document.paragraphs:
+        print(para.text)
 
-# === 第三步：讓使用者選擇要讀的文件 ===
-choice = int(input("請輸入要讀取的文件編號：")) - 1
-file_path = os.path.join("downloaded_docs", docx_files[choice])
+def main():
+    # 1) 下載整個資料夾
+    download_folder(FOLDER_ID, DOWNLOAD_DIR)
 
-# === 第四步：讀取 DOCX 內容 ===
-document = Document(file_path)
+    # 2) 抓取下載到的 DOCX 檔案
+    docx_files = list_docx_files(DOWNLOAD_DIR)
 
-print("\n=== 文件內容 ===")
-for para in document.paragraphs:
-    print(para.text)
+    if not docx_files:
+        print("⚠️ 沒有找到任何 .docx 文件")
+        return
+
+    print("找到以下 DOCX 文件：")
+    for i, f in enumerate(docx_files, 1):
+        print(f"{i}. {f}")
+
+    # 3) 讓使用者選擇要讀的文件（包含輸入防錯處理）
+    try:
+        choice = int(input("請輸入要讀取的文件編號：").strip()) - 1
+        if choice < 0 or choice >= len(docx_files):
+            print("輸入的編號不在範圍內")
+            return
+    except ValueError:
+        print("輸入錯誤，請輸入數字")
+        return
+
+    file_path = os.path.join(DOWNLOAD_DIR, docx_files[choice])
+
+    # 4) 讀取 DOCX 內容
+    print("\n=== 文件內容 ===")
+    read_docx_file(file_path)
+
+if __name__ == "__main__":
+    main()
