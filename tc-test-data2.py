@@ -1,0 +1,47 @@
+import time
+import hashlib
+import requests
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+import json
+app_key = 'f24fc42d1c574e2c84755ccc'
+secret_key = '60475a5140d672c8f361cd114091bca3'
+host = 'tc.stu.edu.tw'
+timestamp = int(time.time()) # 一個 10 碼的時間 timestamp 數字
+# 產生一個臨時檔案
+stu_id = input("請輸入STU ID  : ")
+
+filename = input("請在相同目錄下 輸入要轉檔的資料名稱 : ")
+# 在 TC 建立檔案的 meta 資料
+url_partial = '/external-api/v2/ono/uploads?app_key={}&ts={}'.format(app_key,timestamp)
+token = hashlib.md5((url_partial + secret_key).encode()).hexdigest()[:20]
+target_url = 'https://{}{}&token={}'.format(host, url_partial, token)
+response = requests.post(target_url,data=json.dumps( 
+    { 
+    "name": filename, 
+    "size": int(1.8), 
+    "user_no": stu_id, 
+    "allow_download": False, 
+    "is_folder": False, 
+    "parent_id": 0, 
+    } ), 
+    headers={"Content-Type": "application/json"},) 
+print(response.status_code,response.json())# 解析JSON响应
+
+if response.status_code == 201:
+    url = response.json().get("upload_url") 
+    fields = {"file": (filename, open(filename, "rb"))}
+    m = MultipartEncoder(fields=fields) 
+    response = requests.put(url, data=m, headers={"Content-Type": m.content_type})
+    print(response.status_code, response.json())
+    # 获取字段1和字段2的值
+    # field1_value = response.json().get("id")
+    # field2_value = response.json().get("name")
+    # field3_value = response.json().get("type")
+     
+#     # # 打印字段的值
+    # print('Field 1-id_no:', field1_value)
+    # print('Field 2-name:', field2_value)
+    # print('Field 3-type:', field3_value)
+else :
+# 如果请求失败，打印错误消息
+    print('Failed to retrieve data. Status code:', response.status_code)
