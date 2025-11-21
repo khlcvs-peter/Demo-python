@@ -1,0 +1,10 @@
+a= int(input("請輸入爸爸+媽媽的年齡 ? "))
+b= int(input("請輸入爸爸+兒子的年齡"))
+c = int(input("請輸入媽媽+兒子的年齡"))
+avg = (a+b+c)/2
+sun = (avg -a) 
+father = (b-sun)
+mother = (c-sun)
+print ('兒子的年齡是 ', sun)
+print ('爸爸的年齡是', father)
+print ('媽媽的年齡是 ', mother)

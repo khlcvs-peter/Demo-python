@@ -1,5 +1,6 @@
 import os
 import re
+import csv
 from zeep import Client
 from zeep.exceptions import Fault
 
@@ -56,116 +57,36 @@ if __name__ == "__main__":
         # 轉換為字串，確保能夠儲存
         teacher_response_str = str(teacher_response)
         save_to_file("result.txt", teacher_response_str)
-import re
 
+# 合併 result.txt 與 result1.txt
+def merge_files(file1, file2, output_file):
+    """將兩個檔案合併並儲存為 output_file"""
+    try:
+        with open(file1, "r", encoding="utf-8") as f1, open(file2, "r", encoding="utf-8") as f2:
+            content = f1.read() + "\n" + f2.read()
+        
+        with open(output_file, "w", encoding="utf-8") as outfile:
+            outfile.write(content)
+        print(f"檔案已合併並儲存至 {output_file}")
+    except Exception as e:
+        print(f"[File Error] 無法合併檔案: {e}")
+
+# 合併檔案
+merge_files("result.txt", "result1.txt", "result.txt")
+
+# 清理文本內容
 def clean_text(text):
     """刪除指定文字與特殊字元"""
-    # 移除 'tbltmp'
-    
     text = text.replace("GetBasTeacherResult", "")
     text = text.replace("tbltmp", "")
     text = text.replace("_value_1", "")
     text = text.replace("'schema': <Schema(location=None, tns=None)>", "")
-    
-    # 移除 {} 和 []
-    text = re.sub(r"[\{\}\[\]\,\'':\ \/n]", "", text)
-    
+    text = re.sub(r"[\{\}\[\]\,\'':\ \/n]", "", text)  # 移除 {} 和 []
     return text
-def clean_file(filename):
-    """讀取檔案，刪除空白文字與空白行，並重新寫入檔案"""
-    try:
-        with open(filename, "r", encoding="utf-8") as file:
-            lines = file.readlines()
 
-        # 移除每行前後空白，並過濾掉空行
-        cleaned_lines = [line.strip() for line in lines if line.strip()]
-
-        with open(filename, "w", encoding="utf-8") as file:
-            file.write("\n".join(cleaned_lines))
-
-        print(f"已清理並更新 {filename}")
-
-    except Exception as e:
-        print(f"[File Error] 無法處理文件: {e}")
-
-# 執行清理
-clean_file("result1.txt")
-
-def process_file(input_file, output_file):
-    """讀取檔案、處理文字，並寫入新檔案"""
-    try:
-        with open(input_file, "r", encoding="utf-8") as infile:
-            content = infile.read()
-
-        cleaned_content = clean_text(content)
-
-        with open(output_file, "w", encoding="utf-8") as outfile:
-            outfile.write(cleaned_content)
-        
-        print(f"已處理並儲存至 {output_file}")
-    except Exception as e:
-        print(f"[File Error] {e}")
-
-def clean_file(filename):
-    """讀取檔案，刪除空白文字與空白行，並重新寫入檔案"""
-    try:
-        with open(filename, "r", encoding="utf-8") as file:
-            lines = file.readlines()
-
-        # 移除每行前後空白，並過濾掉空行
-        cleaned_lines = [line.strip() for line in lines if line.strip()]
-
-        with open(filename, "w", encoding="utf-8") as file:
-            file.write("\n".join(cleaned_lines))
-
-        print(f"已清理並更新 {filename}")
-
-    except Exception as e:
-        print(f"[File Error] 無法處理文件: {e}")
-
-
-# 執行檔案處理
-process_file("result.txt", "result1.txt")
-
-import os
-import re
-
-# 設定目標目錄
-folder_path = "your_folder_path"  # 替換為你的TXT文件夾路徑
-keywords = ["目標關鍵字1", "目標關鍵字2"]  # 你要查找的關鍵字列表
-
-# 正則表達式匹配特殊符號
-special_chars_pattern = r'[(),{}"\']'
-
-def clean_text(text):
-    """去除特殊符號"""
-    return re.sub(special_chars_pattern, '', text)
-
-def search_keywords_in_txt(folder):
-    """遍歷TXT文件並搜尋關鍵字"""
-    for filename in os.listdir(folder):
-        if filename.endswith(".txt"):
-            file_path = os.path.join(folder, filename)
-            with open(file_path, "r", encoding="utf-8") as file:
-                content = file.read()
-
-                # 去除特殊符號
-                cleaned_content = clean_text(content)
-
-                # 查找關鍵字
-                for keyword in keywords:
-                    if keyword in cleaned_content:
-                        print(f"文件: {filename} 發現關鍵字: {keyword}")
-                        print(f"內容: {cleaned_content}\n")
-
-# 執行搜尋
-#search_keywords_in_txt(folder_path)
-
-import csv
-import re
-
+# 轉換檔案為 CSV
 def convert_txt_to_csv(txt_filename, csv_filename):
-    """讀取 result1.txt，解析多筆資料並轉換成 result1.csv"""
+    """讀取 result.txt，解析多筆資料並轉換成 result.csv"""
     headers = ["TEACHER_CODE", "NAME", "GENDER", "EMAIL", "TEL", "ACCOUNT", "IS_TEACHER", "EDU_DEPT"]
     data_list = []  # 存放多筆資料
     data_dict = {}  # 暫存單筆資料
@@ -203,5 +124,5 @@ def convert_txt_to_csv(txt_filename, csv_filename):
     except Exception as e:
         print(f"[Error] 無法處理文件: {e}")
 
-# 執行轉換
-convert_txt_to_csv("result1.txt", "get-teacher.csv")
+# 轉換 result.txt 為 CSV
+convert_txt_to_csv("result.txt", "get-teacher.csv")

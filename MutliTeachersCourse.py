@@ -2,8 +2,6 @@ import os
 import re
 from zeep import Client
 from zeep.exceptions import Fault
-def main():
-    print("這是 多人授課課程資料.py 的主要功能！")
 
 class SoapWebService:
     def __init__(self, wsdl_url):
@@ -40,11 +38,6 @@ class SoapWebService:
     def MutliTeachersCourse(self, id_key):
         """查詢多人授課課程基本資料"""
         return self.call_api("MutliTeachersCourse", IDKey=id_key)
-     
-    
-
-   
-        
 def save_to_file(filename, data):
     """將結果寫入文件"""
     try:
@@ -53,7 +46,6 @@ def save_to_file(filename, data):
         print(f"結果已儲存至 {filename}")
     except Exception as e:
         print(f"[File Error] 無法寫入文件: {e}")
-
 
 # 使用 Web 服務
 if __name__ == "__main__":
@@ -69,7 +61,6 @@ if __name__ == "__main__":
     if course_response:
         # 轉換為字串，確保能夠儲存
         course_response_str = str(course_response)
-       
         save_to_file("MutliTeachersCourse.txt", course_response_str)
 import re
 
@@ -184,7 +175,7 @@ def clean_text(text):
 
 def convert_txt_to_csv(txt_filename, csv_filename):
     """讀取 course1.txt，解析多筆資料並轉換成 course1.csv，移除特殊字元"""
-    headers = ["CCODE", "TEACHER_CODE"]
+    headers = ["CCODE",  "TEACHER_CODE"]
     data_list = []  # 存放多筆資料
     data_dict = {}  # 暫存單筆資料
 
@@ -223,10 +214,4 @@ def convert_txt_to_csv(txt_filename, csv_filename):
         print(f"[Error] 無法處理文件: {e}")
 
 # 執行轉換
-convert_txt_to_csv("MutliTeachersCourse1.txt", "MutliTeachersCourse.csv")
-file_path = "MutliTeachersCourse1.txt" 
-if os.path.exists(file_path):
-    os.remove(file_path)
-file_path = "MutliTeachersCourse.txt" 
-if os.path.exists(file_path):
-    os.remove(file_path)
+convert_txt_to_csv("MutliTeachersCourse.txt", "MutliTeachersCourse1.csv")
